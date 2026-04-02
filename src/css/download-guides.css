@@ -1,0 +1,209 @@
+@import './base.css';
+
+/* ─────────────────────────────────────────────────────────────
+   download-guides.css  —  Page 2 ONLY
+   Requires base.css. #landing, .mg-guide-card, .mg-next-panel,
+   .mg-cta-btn, .mg-back-link are already defined in base.css.
+───────────────────────────────────────────────────────────── */
+
+/* ── DOWNLOAD PAGE MAIN ─────────────────────────────────────── */
+.mg-dl-page {
+  position: relative; z-index: 1; flex: 1;
+}
+.mg-dl-page::before {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse 60% 50% at 20% 20%, rgba(17,51,168,.45) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 40% at 80% 80%, rgba(56,217,245,.08) 0%, transparent 65%);
+}
+.mg-dl-page::after {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  /* background-image:
+    linear-gradient(rgba(56,217,245,.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(56,217,245,.03) 1px, transparent 1px);
+  background-size: 60px 60px; */
+}
+
+.mg-dl-inner {
+  max-width: 700px;
+  position: relative; z-index: 2;
+}
+
+/* ── CONFETTI DOTS ──────────────────────────────────────────── */
+.mg-dot {
+  position: absolute; border-radius: 50%; pointer-events: none;
+  animation: mg-float linear infinite; opacity: .45;
+}
+
+/* ── SUCCESS RING ───────────────────────────────────────────── */
+/* Image 2: Thin cyan circle (~72px) with a centred check icon —
+   no fill, just a 1.5px cyan border. */
+.mg-check-ring {
+  width: 72px; height: 72px; border-radius: 50%;
+  background: transparent;
+  border: 1.5px solid var(--mg-cyan);
+  display: flex; align-items: center; justify-content: center;
+  animation: mg-pop .5s cubic-bezier(.34,1.56,.64,1) both;
+  color: var(--mg-cyan); font-size: 1.8rem;
+}
+
+/* ── STATUS TAG ─────────────────────────────────────────────── */
+/* Image 2: Small pill below the ring — dark navy bg, cyan border + text,
+   stars icon, "READY FOR DOWNLOAD" uppercase. */
+.mg-tag {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: .62rem; font-weight: 500;
+  letter-spacing: .10em; text-transform: uppercase;
+  padding: 4px 13px; border-radius: 100px;
+  background: rgba(6,15,52,.80);
+  border: 1px solid rgba(56,217,245,.35);
+  color: var(--mg-cyan);
+}
+
+/* ── HEADINGS ───────────────────────────────────────────────── */
+/* Image 2: "Your Guides Are" — light weight white.
+   "Ready." — italic cyan, same light weight. */
+.mg-dl-heading {
+  font-size: clamp(2rem, 4.5vw, 3rem);
+  font-weight: 500; line-height: 1.18; color: var(--mg-white);
+}
+.mg-dl-heading span,
+.mg-dl-heading em {
+  color: var(--mg-cyan);
+  /* font-style: italic; */
+  font-weight: 300;
+}
+
+/* Image 2: Subtitle is a single muted line, no "Thank you" prefix. */
+.mg-dl-sub {
+  font-size: .88rem; color: var(--mg-muted);
+  max-width: 480px; line-height: 1.72;
+}
+
+/* ── GUIDE CARDS — vertical layout ─────────────────────────── */
+/* Image 2: Three equal-width cards — dark glass, cyan-tinted border,
+   icon at top-left, title bold white, desc muted, outline DL button. */
+.mg-dl-page .mg-guide-card {
+  background: rgba(7,17,64,.55);
+  border: 1px solid rgba(56,217,245,.18);
+  border-radius: var(--mg-radius-lg);
+  backdrop-filter: blur(20px);
+  padding: 1.5rem !important;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Small icon box sits at the top */
+.mg-dl-page .mg-card-icon {
+  width: 36px; height: 36px;
+  border-radius: 8px;
+  background: var(--mg-cyan-10);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--mg-cyan); font-size: 1rem;
+  margin-bottom: .85rem;
+  flex-shrink: 0;
+}
+
+.mg-dl-page .mg-card-title {
+  font-size: .88rem; font-weight: 600;
+  color: var(--mg-white);
+  margin-bottom: .5rem;
+  line-height: 1.3;
+}
+
+.mg-dl-page .mg-card-desc {
+  font-size: .72rem; color: var(--mg-muted);
+  line-height: 1.6; flex-grow: 1;
+  margin-bottom: 1.1rem;
+}
+
+/* ── DOWNLOAD BUTTON ────────────────────────────────────────── */
+/* Image 2: Full-width outline button — transparent bg, 1px cyan border,
+   cyan text; fills cyan on hover with navy text. */
+.mg-dl-btn {
+  display: inline-flex !important; align-items: center;
+  justify-content: center; gap: 7px;
+  background: transparent !important;
+  border: 1px solid var(--mg-cyan) !important;
+  color: var(--mg-cyan) !important;
+  border-radius: var(--mg-radius-sm) !important;
+  font-family: 'Poppins', sans-serif !important;
+  font-size: .78rem !important; font-weight: 500 !important;
+  text-decoration: none !important;
+  padding: .5rem 1rem !important;
+  transition: background .2s, color .2s !important;
+  width: 100% !important;
+  margin-top: auto;
+}
+.mg-dl-btn:hover {
+  background: var(--mg-cyan) !important;
+  color: var(--mg-navy) !important;
+}
+
+/* ── NEXT PANEL ─────────────────────────────────────────────── */
+/* Image 2: Centred panel, max 700px, dark glass with subtle cyan border.
+   Three rows: icon + title + subtitle, separated by faint hr lines. */
+.mg-next-panel {
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* "What happens next?" heading */
+.mg-next-panel .mg-next-heading {
+  font-size: 1rem; font-weight: 500; color: var(--mg-white);
+}
+
+/* Icon boxes inside the next panel — match Image 2 size */
+.mg-next-panel .mg-next-icon {
+  width: 36px; height: 36px; flex-shrink: 0;
+  border-radius: var(--mg-radius-sm);
+  background: var(--mg-cyan-10);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--mg-cyan); font-size: .9rem;
+}
+
+.mg-next-panel .mg-next-title {
+  font-size: .82rem; font-weight: 500; color: var(--mg-white);
+}
+.mg-next-panel .mg-next-sub {
+  font-size: .72rem; color: var(--mg-muted); line-height: 1.5;
+}
+
+/* ── CTA BAR ────────────────────────────────────────────────── */
+/* Image 2: Floating sticky bar at the very bottom of the viewport —
+   transparent bg, centred row with the cyan CTA button + back link. */
+.mg-dl-cta-bar {
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+  padding: .75rem 1.5rem;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+/* CTA button in the bar matches base .mg-cta-btn but slightly larger */
+.mg-dl-cta-bar .mg-cta-btn {
+  padding: .6rem 1.5rem !important;
+  font-size: .88rem !important;
+}
+
+/* Back link in the bar — muted with left-arrow, lightens on hover */
+.mg-dl-cta-bar .mg-back-link {
+  font-size: .8rem;
+  color: var(--mg-muted);
+  text-decoration: none;
+  transition: color .2s;
+}
+.mg-dl-cta-bar .mg-back-link:hover { color: var(--mg-cyan); }
+
+/* ── RESPONSIVE ─────────────────────────────────────────────── */
+@media (max-width: 767.98px) {
+  .mg-dl-inner { padding-left: 1rem; padding-right: 1rem; }
+  .mg-dl-heading { font-size: clamp(1.6rem, 6vw, 2.2rem); }
+}

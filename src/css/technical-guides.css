@@ -1,0 +1,321 @@
+@import './base.css';
+
+/* ─────────────────────────────────────────────────────────────
+   technical-guides.css  —  Page 1 ONLY
+   Requires base.css (already imported via JS entry point).
+   Contains ONLY styles not present in base.css.
+───────────────────────────────────────────────────────────── */
+
+/* ── PAGE LAYOUT ────────────────────────────────────────────── */
+.mg-page-wrap {
+  position: relative; z-index: 1;
+  flex: 1;
+}
+
+/* ── HERO COLUMN ────────────────────────────────────────────── */
+.mg-hero-col {
+  position: relative;
+  overflow: hidden;
+}
+
+.mg-hero-col::before {
+  content: ''; position: absolute; inset: 0;
+  pointer-events: none; z-index: 0;
+  /* background:
+    radial-gradient(ellipse 75% 65% at 10% 20%, rgba(17,51,168,.55) 0%, transparent 70%),
+    radial-gradient(ellipse 45% 40% at 85% 85%, rgba(56,217,245,.08) 0%, transparent 65%); */
+}
+.mg-hero-col::after {
+  content: ''; position: absolute; inset: 0;
+  pointer-events: none; z-index: 0;
+  /* background-image:
+    linear-gradient(rgba(56,217,245,.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(56,217,245,.04) 1px, transparent 1px);
+  background-size: 60px 60px; */
+}
+.mg-hero-col > * { position: relative; z-index: 1; }
+
+/* ── BADGE — tight pill, constrained to content width ────────── */
+/* In Image 1 the badge is a small pill, NOT full-width             */
+.mg-hero-col .mg-badge {
+  display: inline-flex;
+  align-self: flex-start;
+  width: auto;
+  max-width: fit-content;
+  /* Slightly darker pill to sit on the hero gradient */
+  background: rgba(200,169,110,.12);
+  border-color: rgba(200,169,110,.38);
+  color: var(--mg-gold);
+  font-size: .62rem;
+  letter-spacing: .16em;
+  padding: 4px 14px;
+}
+
+/* ── HERO TYPOGRAPHY ────────────────────────────────────────── */
+.mg-quote {
+  font-size: clamp(1.8rem, 3vw, 2.6rem);
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--mg-white);
+  letter-spacing: -.01em;
+}
+/* Image 1: "Resilient, Scalable Operations." is cyan + italic + light weight */
+.mg-quote em {
+  color: var(--mg-cyan);
+  font-style: italic;
+  font-weight: 300;
+}
+
+.mg-hero-desc {
+  font-size: .92rem;
+  line-height: 1.75;
+  color: var(--mg-muted);
+  max-width: 440px;
+}
+
+/* ── STATS ──────────────────────────────────────────────────── */
+/* Image 1: Three stats separated by cyan 2px left-border dividers.
+   First stat has no left border. Numbers are bold white, labels are
+   muted small caps. */
+.mg-stats-row {
+  display: flex;
+  gap: 0;
+  flex-wrap: wrap;
+}
+.mg-stat {
+  padding: 0 28px 0 22px;
+  border-left: 2px solid var(--mg-cyan);
+}
+.mg-stat:first-child {
+  padding-left: 0;
+  border-left: none;
+}
+.mg-stat-num {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--mg-white);
+  line-height: 1;
+}
+.mg-stat-label {
+  font-size: .68rem;
+  color: var(--mg-muted);
+  letter-spacing: .05em;
+  margin-top: 3px;
+}
+
+/* ── FEATURE ROWS ───────────────────────────────────────────── */
+/* Image 1: Dark semi-transparent pill rows with subtle border,
+   icon on the left (cyan tint box), title bold white, subtitle muted. */
+.mg-feature {
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: var(--mg-radius);
+  transition: background .2s, border-color .2s;
+}
+.mg-feature:hover {
+  background: rgba(56,217,245,.08);
+  border-color: var(--mg-cyan-30);
+}
+.mg-feature-icon {
+  width: 38px; height: 38px; flex-shrink: 0;
+  background: var(--mg-cyan-10);
+  border-radius: var(--mg-radius-sm);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--mg-cyan); font-size: 1rem;
+}
+.mg-feature-title {
+  font-size: .85rem; font-weight: 500;
+  color: var(--mg-white);
+  display: block; margin-bottom: 2px;
+}
+.mg-feature-sub {
+  font-size: .72rem; color: var(--mg-muted); line-height: 1.45;
+}
+
+/* ── FORM COLUMN ────────────────────────────────────────────── */
+/* Image 1: Right half has no background fill — the card floats
+   centred over the shared dark background. */
+.mg-form-col {
+  position: relative;
+  overflow: hidden;
+  background: transparent;
+  min-height: calc(100vh - var(--mg-nav-h));
+}
+.mg-form-col::before {
+  content: ''; position: absolute; pointer-events: none;
+  width: 560px; height: 560px;
+  top: 50%; left: 50%; transform: translate(-50%,-50%);
+  background: radial-gradient(circle, rgba(56,217,245,.06) 0%, transparent 70%);
+  z-index: 0;
+}
+
+/* ── FORM CARD ──────────────────────────────────────────────── */
+/* Image 1: Dark glass card — rgba(6,15,52,.88), 1px light-white border,
+   large border-radius, strong drop shadow. */
+.mg-form-card {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    max-width: 65%;
+    background: rgb(119 119 119 / 18%);
+    border: 1px solid rgba(255, 255, 255, .12);
+    border-radius: var(--mg-radius-lg);
+    backdrop-filter: blur(24px);
+    box-shadow: 0 0 0 1px rgba(56, 217, 245, .06), 0 32px 64px rgba(0, 0, 0, .55), inset 0 1px 0 rgba(255, 255, 255, .07);
+}
+
+/* ── FORM TITLE ─────────────────────────────────────────────── */
+/* Image 1: "Access Your" is white bold, "Executive Guides" is cyan. */
+.mg-form-title {
+  font-size: 1.75rem; font-weight: 600;
+  color: var(--mg-white); line-height: 1.15;
+}
+.mg-form-title span { color: var(--mg-cyan); }
+
+.mg-form-subtitle {
+  font-size: .8rem; color: var(--mg-muted); line-height: 1.65;
+}
+
+/* ── LABELS ─────────────────────────────────────────────────── */
+/* Image 1: Very small uppercase track labels, white-soft, with
+   a cyan asterisk for required fields. */
+.mg-label {
+  display: block;
+  font-size: .68rem; font-weight: 600;
+  color: var(--mg-white-soft);
+  letter-spacing: .10em; text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.mg-req { color: var(--mg-cyan); }
+
+/* ── INPUTS ─────────────────────────────────────────────────── */
+/* Image 1: Frosted inputs — semi-transparent white bg, light border,
+   white text, cyan focus ring. */
+.mg-input {
+  display: block; width: 100%;
+  background: rgba(255,255,255,.07);
+  border: 1px solid rgba(255,255,255,.15);
+  border-radius: var(--mg-radius-sm);
+  padding: 11px 14px;
+  color: var(--mg-white);
+  font-family: 'Poppins', sans-serif;
+  font-size: .88rem;
+  outline: none;
+  transition: border-color .2s, box-shadow .2s, background .2s;
+  -webkit-appearance: none; appearance: none;
+}
+.mg-input::placeholder { color: rgba(255,255,255,.28); }
+.mg-input:focus {
+  border-color: var(--mg-cyan);
+  box-shadow: 0 0 0 3px rgba(56,217,245,.15);
+  background: rgba(255,255,255,.10);
+}
+.mg-input.is-invalid { border-color: var(--mg-error); }
+.mg-field-error { font-size: .68rem; color: var(--mg-error); margin-top: 4px; }
+
+/* ── INTL-TEL-INPUT ─────────────────────────────────────────── */
+.iti { width: 100%; }
+.iti__flag {
+  background-image: url('https://cdn.jsdelivr.net/npm/intl-tel-input@21.1.4/build/img/flags.png') !important;
+}
+@media (-webkit-min-device-pixel-ratio:2),(min-resolution:192dpi) {
+  .iti__flag {
+    background-image: url('https://cdn.jsdelivr.net/npm/intl-tel-input@21.1.4/build/img/flags@2x.png') !important;
+  }
+}
+.iti__selected-flag {
+  background: rgba(255,255,255,.07) !important;
+  border-right: 1px solid rgba(255,255,255,.15) !important;
+  border-radius: var(--mg-radius-sm) 0 0 var(--mg-radius-sm);
+}
+.iti__selected-flag:hover,
+.iti__selected-flag:focus { background: rgba(56,217,245,.1) !important; }
+.iti__selected-dial-code  { color: var(--mg-white) !important; font-size: .82rem; }
+.iti__arrow { border-top-color: rgba(255,255,255,.5) !important; }
+.iti__arrow--up { border-bottom-color: rgba(255,255,255,.5) !important; }
+
+.iti__country-list {
+  background: #060f2e !important;
+  border: 1px solid rgba(56,217,245,.25) !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,.6) !important;
+  border-radius: var(--mg-radius-sm);
+}
+.iti__country { padding: 8px 12px !important; }
+.iti__country:hover,
+.iti__country.iti__highlight { background: rgba(56,217,245,.12) !important; }
+.iti__country-name  { color: var(--mg-white) !important; font-size: .82rem; }
+.iti__dial-code     { color: var(--mg-muted) !important; font-size: .78rem; }
+.iti__divider       { border-bottom-color: rgba(255,255,255,.1) !important; margin: 4px 0; }
+.iti__search-input  {
+  background: rgba(255,255,255,.07) !important;
+  border: 1px solid rgba(255,255,255,.15) !important;
+  color: var(--mg-white) !important;
+  border-radius: 6px; padding: 6px 10px; font-family: 'Poppins', sans-serif;
+}
+.iti--separate-dial-code .iti__selected-flag {
+  border-radius: var(--mg-radius-sm) 0 0 var(--mg-radius-sm);
+}
+.iti--separate-dial-code input.mg-input {
+  border-radius: 0 var(--mg-radius-sm) var(--mg-radius-sm) 0 !important;
+}
+
+/* ── RECAPTCHA NOTE ─────────────────────────────────────────── */
+.mg-recaptcha-note { font-size: .62rem; color: rgba(255,255,255,.32); line-height: 1.5; }
+.mg-recaptcha-note a { color: rgba(56,217,245,.55); text-decoration: none; }
+.mg-recaptcha-note a:hover { color: var(--mg-cyan); }
+
+/* ── SUBMIT BUTTON ──────────────────────────────────────────── */
+/* Image 1: Full-width cyan gradient button — bright #38d9f5 → #0ea5e9,
+   navy text, strong glow shadow. */
+.mg-btn-submit {
+  background: linear-gradient(135deg, #38d9f5 0%, #0ea5e9 100%);
+  border: none;
+  color: var(--mg-navy) !important;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600; font-size: .9rem;
+  border-radius: var(--mg-radius-sm);
+  box-shadow: 0 4px 24px rgba(56,217,245,.38);
+  transition: transform .15s, box-shadow .2s;
+  position: relative; overflow: hidden; cursor: pointer;
+  letter-spacing: .02em;
+}
+.mg-btn-submit::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,.18) 0%, transparent 55%);
+  pointer-events: none;
+}
+.mg-btn-submit:hover    { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(56,217,245,.55); }
+.mg-btn-submit:active   { transform: translateY(0); }
+.mg-btn-submit:disabled { opacity: .65; cursor: wait; transform: none; }
+
+/* ── SPINNER ────────────────────────────────────────────────── */
+.mg-spinner {
+  width: 16px; height: 16px; border-radius: 50%; flex-shrink: 0;
+  border: 2px solid rgba(4,13,43,.3); border-top-color: var(--mg-navy);
+  animation: mg-spin .7s linear infinite; display: none;
+}
+.mg-btn-submit.loading .mg-spinner   { display: inline-block; }
+.mg-btn-submit.loading .mg-btn-label { display: none; }
+
+/* ── TRUST NOTE ─────────────────────────────────────────────── */
+/* Image 1: Subtle cyan-tinted trust strip at the bottom of the card —
+   thin border, lock icon cyan, text muted small. */
+.mg-divider-line { border-color: rgba(255,255,255,.10) !important; }
+.mg-trust {
+  background: rgba(56,217,245,.04);
+  border: 1px solid rgba(56,217,245,.14);
+  border-radius: var(--mg-radius-sm);
+}
+.mg-trust i { color: var(--mg-cyan); font-size: .88rem; }
+.mg-trust p { font-size: .7rem; color: var(--mg-muted); line-height: 1.55; }
+
+/* ── RESPONSIVE ─────────────────────────────────────────────── */
+@media (max-width:991.98px) {
+  .mg-hero-col { padding: 3rem 1.5rem !important; }
+  .mg-form-col { padding: 3rem 1.25rem !important; min-height: auto; }
+  .mg-stats-row { gap: 16px; }
+}
+@media (max-width:575.98px) {
+  .mg-quote { font-size: 1.55rem; }
+  .mg-form-card { max-width: 100%; }
+}
