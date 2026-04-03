@@ -249,8 +249,8 @@
         const target = parseInt(el.getAttribute("data-target"));
         
         let suffix = "";
-        if (target === 500) suffix = "+";  // 500+
-        if (target === 99) suffix = "%";   // 99%
+        if (target === 116) suffix = "+";  // 116+
+        if (target === 80) suffix = "+";   // 80+
 
         animateCounter(el, target, 2000, suffix);
     });

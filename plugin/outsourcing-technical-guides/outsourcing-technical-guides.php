@@ -20,10 +20,11 @@ define( 'OTG_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 define( 'OTG_DIST_URL',   OTG_PLUGIN_URL . 'dist/' );
 define( 'OTG_PDF_URL',    OTG_PLUGIN_URL . 'pdf/' );
 
+/* Email template builders live in a dedicated file */
+require_once OTG_PLUGIN_DIR . 'email-templates.php';
+
 /* ═══════════════════════════════════════════════════════════════
    SESSION BOOTSTRAP
-   Start session early enough for all hooks to use it.
-   Only starts once — safe to call multiple times.
 ═══════════════════════════════════════════════════════════════ */
 add_action( 'init', 'otg_start_session', 1 );
 
@@ -34,19 +35,7 @@ function otg_start_session() {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   1. FULL DOCUMENT OVERRIDE  (fixes Betheme / any theme conflict)
-   ─────────────────────────────────────────────────────────────
-   WHY wp_head() BREAKS THINGS:
-   Even when you bypass the theme template with template_include,
-   calling wp_head() still fires every action hooked to it —
-   including Betheme's wp_enqueue_scripts which loads monstrous
-   CSS files (be_style.css, mfn-opts.css, etc) that override
-   everything we write.
-
-   THE FIX:
-   On our two pages we intercept ALL output via output buffering,
-   discard it, and print our own complete HTML document with only
-   the assets we need. No wp_head(), no Betheme, no conflicts.
+   1. FULL DOCUMENT OVERRIDE
 ═══════════════════════════════════════════════════════════════ */
 add_action( 'template_redirect', 'otg_maybe_render_page', 1 );
 
@@ -61,17 +50,10 @@ function otg_maybe_render_page() {
     }
 
     if ( is_page( $download_slug ) ) {
-        // ── ACCESS GUARD ──────────────────────────────────────
-        // Only allow access if a valid token was written to the
-        // session by the REST submission handler. Anyone who hits
-        // this URL directly (no prior form submission) gets
-        // redirected back to the form page.
         if ( empty( $_SESSION['otg_access_token'] ) ) {
             wp_safe_redirect( home_url( '/' . $form_slug ) );
             exit;
         }
-
-        // Consume the token — one-time use, prevents reload-sharing.
         unset( $_SESSION['otg_access_token'] );
 
         while ( ob_get_level() ) ob_end_clean();
@@ -125,11 +107,10 @@ function otg_settings_page() { ?>
                         <input type="text" name="otg_notify_emails"
                             value="<?php echo esc_attr( get_option('otg_notify_emails', get_option('admin_email')) ); ?>"
                             class="large-text"
-                            placeholder="sales@company.com, manager@company.com, ceo@company.com">
+                            placeholder="sales@company.com, manager@company.com">
                         <p class="description">
                             Enter one email <strong>or multiple emails separated by commas</strong>.<br>
-                            Example: <code>sales@company.com, manager@company.com</code><br>
-                            All addresses will receive the lead notification simultaneously.
+                            All addresses receive lead notifications and consultation requests.
                         </p>
                     </td>
                 </tr>
@@ -174,10 +155,26 @@ add_action( 'rest_api_init', function () {
             'recaptcha_token' => [ 'required' => true, 'sanitize_callback' => 'sanitize_text_field' ],
         ],
     ] );
+
+    /* ── CONSULTATION  /wp-json/otg/v1/consultation ─────────── */
+    register_rest_route( 'otg/v1', '/consultation', [
+        'methods'             => 'POST',
+        'callback'            => 'otg_handle_consultation',
+        'permission_callback' => '__return_true',
+        'args' => [
+            'first_name'   => [ 'required' => true,  'sanitize_callback' => 'sanitize_text_field' ],
+            'last_name'    => [ 'required' => true,  'sanitize_callback' => 'sanitize_text_field' ],
+            'company_name' => [ 'required' => true,  'sanitize_callback' => 'sanitize_text_field' ],
+            'work_email'   => [ 'required' => true,  'sanitize_callback' => 'sanitize_email' ],
+            'phone_number' => [ 'required' => true,  'sanitize_callback' => 'sanitize_text_field' ],
+            // guide_name is the label of the card button the user clicked
+            'guide_name'   => [ 'required' => false, 'sanitize_callback' => 'sanitize_text_field', 'default' => '' ],
+        ],
+    ] );
+
 } );
 
 function otg_handle_submission( WP_REST_Request $request ) {
-    // Session must be active for the REST request too.
     otg_start_session();
 
     $data = $request->get_params();
@@ -194,12 +191,18 @@ function otg_handle_submission( WP_REST_Request $request ) {
     otg_send_admin_notification( $data );
     otg_send_confirmation( $data );
 
-    // ── WRITE ACCESS TOKEN ─────────────────────────────────────
-    // A random token in the session tells the download page that
-    // this visitor just completed a valid form submission.
-    // The token is consumed (deleted) on first use — see the
-    // access guard in otg_maybe_render_page().
+    // Grant access to the download page (one-time token)
     $_SESSION['otg_access_token'] = bin2hex( random_bytes( 16 ) );
+
+    // Persist contact data so the download page can attach it to
+    // a consultation request without re-prompting the user.
+    $_SESSION['otg_contact'] = [
+        'first_name'   => $data['first_name'],
+        'last_name'    => $data['last_name'],
+        'company_name' => $data['company_name'],
+        'work_email'   => $data['work_email'],
+        'phone_number' => $data['phone_number'],
+    ];
 
     $slug = get_option( 'otg_download_page_slug', 'outsourcing-download-guides' );
     return new WP_REST_Response( [
@@ -207,6 +210,18 @@ function otg_handle_submission( WP_REST_Request $request ) {
         'message'      => 'Submission received.',
         'redirect_url' => home_url( '/' . $slug ),
     ], 200 );
+}
+
+function otg_handle_consultation( WP_REST_Request $request ) {
+    $data = $request->get_params();
+
+    if ( ! is_email( $data['work_email'] ) ) {
+        return new WP_REST_Response( [ 'success' => false, 'message' => 'Invalid email address.' ], 400 );
+    }
+
+    otg_send_consultation( $data );
+
+    return new WP_REST_Response( [ 'success' => true, 'message' => 'Consultation request sent.' ], 200 );
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -230,29 +245,81 @@ function otg_verify_recaptcha( string $token ) {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   5. FLAMINGO STORAGE
+   5. FLAMINGO — INBOUND MESSAGE + ADDRESS BOOK
 ═══════════════════════════════════════════════════════════════ */
 function otg_store_flamingo( array $d ) {
     if ( ! class_exists( 'Flamingo_Inbound_Message' ) ) return;
 
+    // ── Inbound Message ───────────────────────────────────────
     Flamingo_Inbound_Message::add( [
         'channel'    => 'outsourcing-technical-guides',
-        'subject'    => sprintf( 'New Guide Request - %s %s (%s)', $d['first_name'], $d['last_name'], $d['company_name'] ),
-        'from'       => sprintf( '%s %s <%s>', $d['first_name'], $d['last_name'], $d['work_email'] ),
+        'subject'    => sprintf(
+            'New Guide Request – %s %s (%s)',
+            $d['first_name'],
+            $d['last_name'],
+            $d['company_name']
+        ),
+        'from'       => sprintf(
+            '%s %s <%s>',
+            $d['first_name'],
+            $d['last_name'],
+            $d['work_email']
+        ),
         'from_name'  => trim( $d['first_name'] . ' ' . $d['last_name'] ),
         'from_email' => $d['work_email'],
         'fields'     => $d,
         'meta'       => [ 'remote_ip' => sanitize_text_field( $_SERVER['REMOTE_ADDR'] ?? '' ) ],
         'timestamp'  => time(),
     ] );
+
+    // ── Address Book ──────────────────────────────────────────
+    if ( ! class_exists( 'Flamingo_Contact' ) ) return;
+
+    // 🔍 Try to find existing contact by email
+    $contacts = Flamingo_Contact::find( [
+        's' => $d['work_email']
+    ] );
+
+    $contact = null;
+
+    if ( ! empty( $contacts ) ) {
+        // Use first matched contact
+        $contact = $contacts[0];
+    } else {
+        // Create new contact
+        $contact = new Flamingo_Contact();
+    }
+
+    // ✏️ Set basic info
+    $contact->name  = trim( $d['first_name'] . ' ' . $d['last_name'] );
+    $contact->email = $d['work_email'];
+
+    // 🧩 Merge meta
+    $existing_meta = (array) ( $contact->meta ?? [] );
+    $contact->meta = array_merge( $existing_meta, [
+        'company' => $d['company_name'],
+        'phone'   => $d['phone_number'],
+    ] );
+
+    // 🏷 Channels (history)
+    $existing_channels = (array) ( $contact->channels ?? [] );
+
+    if ( ! in_array( 'outsourcing-technical-guides', $existing_channels, true ) ) {
+        $existing_channels[] = 'outsourcing-technical-guides';
+    }
+
+    $contact->channels = $existing_channels;
+
+    // 💾 Save (insert/update)
+    $contact->save();
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   6. ADMIN NOTIFICATION  (supports multiple comma-separated emails)
+   6. ADMIN NOTIFICATION EMAIL (on form submit)
 ═══════════════════════════════════════════════════════════════ */
 function otg_get_notify_emails(): array {
-    $raw     = get_option( 'otg_notify_emails', get_option('admin_email') );
-    $emails  = array_map( 'trim', explode( ',', $raw ) );
+    $raw    = get_option( 'otg_notify_emails', get_option('admin_email') );
+    $emails = array_map( 'trim', explode( ',', $raw ) );
     return array_values( array_filter( $emails, 'is_email' ) );
 }
 
@@ -263,59 +330,30 @@ function otg_send_admin_notification( array $d ) {
     $subject = sprintf( '[Magellan Guides] New Lead: %s %s – %s',
         $d['first_name'], $d['last_name'], $d['company_name'] );
 
-    $body = '
-    <div style="font-family:sans-serif;max-width:520px;color:#1a1a1a">
-      <h2 style="color:#0a1a5c;margin-bottom:16px">New Executive Guide Request</h2>
-      <table style="border-collapse:collapse;width:100%;font-size:14px">
-        <tr style="background:#f9f9f9">
-          <td style="padding:10px 12px;border:1px solid #e5e5e5;font-weight:600;width:120px">Name</td>
-          <td style="padding:10px 12px;border:1px solid #e5e5e5">'    . esc_html( $d['first_name'] . ' ' . $d['last_name'] ) . '</td>
-        </tr>
-        <tr>
-          <td style="padding:10px 12px;border:1px solid #e5e5e5;font-weight:600">Company</td>
-          <td style="padding:10px 12px;border:1px solid #e5e5e5">'    . esc_html( $d['company_name'] ) . '</td>
-        </tr>
-        <tr style="background:#f9f9f9">
-          <td style="padding:10px 12px;border:1px solid #e5e5e5;font-weight:600">Email</td>
-          <td style="padding:10px 12px;border:1px solid #e5e5e5">'    . esc_html( $d['work_email'] )   . '</td>
-        </tr>
-        <tr>
-          <td style="padding:10px 12px;border:1px solid #e5e5e5;font-weight:600">Phone</td>
-          <td style="padding:10px 12px;border:1px solid #e5e5e5">'    . esc_html( $d['phone_number'] ) . '</td>
-        </tr>
-      </table>
-      <p style="margin-top:20px;font-size:12px;color:#888">
-        Submitted: ' . current_time('mysql') . '<br>
-        Notified: ' . implode( ', ', array_map( 'esc_html', $recipients ) ) . '
-      </p>
-    </div>';
-
-    // Send to ALL recipients in one call — wp_mail() accepts an array
-    wp_mail( $recipients, $subject, $body, [ 'Content-Type: text/html; charset=UTF-8' ] );
+    wp_mail( $recipients, $subject, otg_email_admin_notification( $d, $recipients ), [ 'Content-Type: text/html; charset=UTF-8' ] );
 }
 
 /* ═══════════════════════════════════════════════════════════════
    7. CONFIRMATION EMAIL TO SUBMITTER
 ═══════════════════════════════════════════════════════════════ */
 function otg_send_confirmation( array $d ) {
-    $download_url = home_url( '/' . get_option( 'otg_download_page_slug', 'outsourcing-download-guides' ) );
-    $subject      = 'Your Magellan Solutions Executive Guides Are Ready';
-    $body = '
-    <div style="font-family:sans-serif;max-width:520px;color:#1a1a1a">
-      <h2 style="color:#0a1a5c">Hi ' . esc_html( $d['first_name'] ) . ',</h2>
-      <p>Thank you for requesting Magellan Solutions\' Executive Guides. Your downloads are ready:</p>
-      <p style="margin:24px 0">
-        <a href="' . esc_url( $download_url ) . '"
-           style="background:#38d9f5;color:#040d2b;padding:12px 28px;border-radius:8px;text-decoration:none;font-weight:600;font-size:15px">
-          Access Your Guides →
-        </a>
-      </p>
-      <p style="margin-top:32px">Best regards,<br><strong>Magellan Solutions Team</strong></p>
-      <hr style="border:none;border-top:1px solid #eee;margin-top:32px">
-      <p style="font-size:11px;color:#aaa">
-        This email was sent to ' . esc_html( $d['work_email'] ) . '
-      </p>
-    </div>';
+    $subject = 'Thank You – Magellan Solutions Executive Guides';
 
-    wp_mail( $d['work_email'], $subject, $body, [ 'Content-Type: text/html; charset=UTF-8' ] );
+    wp_mail( $d['work_email'], $subject, otg_email_confirmation( $d ), [ 'Content-Type: text/html; charset=UTF-8' ] );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   8. CONSULTATION EMAIL
+   Fires when the user clicks "Book a Consultation" on the
+   download page. Sends to all Lead Notification Email(s).
+   Includes the contact's details and the guide they downloaded.
+═══════════════════════════════════════════════════════════════ */
+function otg_send_consultation( array $d ) {
+    $recipients = otg_get_notify_emails();
+    if ( empty( $recipients ) ) return;
+
+    $subject = sprintf( '[Magellan Guides] Book a Consultation – %s %s (%s)',
+        $d['first_name'], $d['last_name'], $d['company_name'] );
+
+    wp_mail( $recipients, $subject, otg_email_consultation( $d ), [ 'Content-Type: text/html; charset=UTF-8' ] );
 }

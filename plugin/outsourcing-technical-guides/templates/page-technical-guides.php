@@ -77,7 +77,7 @@ $logo_url  = $assets . 'logo.webp';
 
                 <div class="mg-badge mb-4 mg-fade-1">Confidential Executive Resource</div>
 
-                <h1 class="mg-quote fw-light mb-3 mg-fade-2">
+                <h1 class="mg-quote mb-3 mg-fade-2">
                 "Outsourcing Isn't Just About Cost Savings —
                 It's About Building <em>Resilient, Scalable Operations.</em>"
                 </h1>
@@ -89,7 +89,7 @@ $logo_url  = $assets . 'logo.webp';
 
                 <div class="mg-stats-row d-flex flex-wrap mb-4 mg-fade-4">
                 <div class="mg-stat">
-                    <div class="mg-stat-num" data-target="500">0</div>
+                    <div class="mg-stat-num" data-target="116">0</div>
                     <div class="mg-stat-label">SMEs Served</div>
                 </div>
 
@@ -99,8 +99,8 @@ $logo_url  = $assets . 'logo.webp';
                 </div>
 
                 <div class="mg-stat">
-                    <div class="mg-stat-num" data-target="99">0</div>
-                    <div class="mg-stat-label">SLA Compliance</div>
+                    <div class="mg-stat-num" data-target="80">0</div>
+                    <div class="mg-stat-label">Industries Catered to</div>
                 </div>
                 </div>
                 <div class="d-flex flex-column gap-2 mg-fade-5">

@@ -121,7 +121,7 @@
 /* ── DOWNLOAD BUTTON ────────────────────────────────────────── */
 /* Image 2: Full-width outline button — transparent bg, 1px cyan border,
    cyan text; fills cyan on hover with navy text. */
-.mg-dl-btn {
+.mg-dl-btn, #mg-consult-btn {
   display: inline-flex !important; align-items: center;
   justify-content: center; gap: 7px;
   background: transparent !important;
@@ -136,7 +136,7 @@
   width: 100% !important;
   margin-top: auto;
 }
-.mg-dl-btn:hover {
+.mg-dl-btn:hover, #mg-consult-btn:hover {
   background: var(--mg-cyan) !important;
   color: var(--mg-navy) !important;
 }
