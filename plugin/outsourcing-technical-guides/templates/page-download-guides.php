@@ -137,13 +137,17 @@ $contact = isset( $_SESSION['otg_contact'] ) ? $_SESSION['otg_contact'] : [];
                             <div class="mg-next-sub">Schedule a consultation with our team to discuss how outsourcing can solve your specific challenges.</div>
                         </div>
                     </div>
-                    
-                    <div class="d-flex align-items-center justify-content-start mt-3">				
+
+                    <div class="d-flex align-items-center justify-content-start mt-3">              
                         <a id="mg-consult-btn" class="mg-dl-btn btn py-2" style="width:auto;">
-                            Book a Consultation
+
+                            <span class="mg-btn-label">Book a Consultation</span>
+
+                            <span class="mg-spinner" style="display:none"></span>
+
                         </a>
-                        <span class="mg-spinner" style="display:none"></span>
                     </div>
+                    
                 </div>
 
                 <div class="mg-next-panel text-start p-4 mb-4 mg-fade-4">

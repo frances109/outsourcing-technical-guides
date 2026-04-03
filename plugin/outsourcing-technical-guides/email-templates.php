@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
    $content       — the inner HTML unique to each email type
 ───────────────────────────────────────────────────────────── */
 function otg_email_wrap( string $header_label, string $content ): string {
-    $logo_url = OTG_PLUGIN_URL . 'assets/logo.webp';
+    $logo_url = OTG_PLUGIN_URL . 'assets/logo-email.png';
 
     return '<!DOCTYPE html>
 <html lang="en">
@@ -44,12 +44,11 @@ function otg_email_wrap( string $header_label, string $content ): string {
 
           <!-- HEADER BAND -->
           <tr>
-            <td style="background:linear-gradient(135deg,#040d2b 0%,#0a1a5c 100%);
-                       padding:32px 40px 28px;text-align:center;">
+            <td style="background:#040d2b;padding:32px 40px 28px;text-align:center;">
               <!-- Logo -->
               <img src="' . esc_url( $logo_url ) . '"
-                   alt="Magellan Solutions" width="180"
-                   style="display:block;margin:0 auto 18px;max-width:180px;height:auto;">
+                   alt="Magellan Solutions" width="240" height="55"
+                   style="display:block;margin:0 auto 18px;width:240px;height:auto;border:0;">
               <!-- Label pill -->
               <span style="display:inline-block;padding:4px 16px;
                            background:rgba(56,217,245,.15);
@@ -303,6 +302,77 @@ function otg_email_consultation( array $d ): string {
 
       <p style="margin:20px 0 0;font-size:11px;color:#aaa;">
         Please follow up within 1 business day.
+      </p>';
+
+    return otg_email_wrap( 'Consultation Request', $content );
+}
+
+/* ─────────────────────────────────────────────────────────────
+   4. CONSULTATION CONFIRMATION  →  sent to the submitter
+      Confirms their consultation request was received.
+───────────────────────────────────────────────────────────── */
+function otg_email_consultation_confirmation( array $d ): string {
+
+    $guide_line = ! empty( $d['guide_name'] )
+        ? '<p style="margin:0 0 24px;font-size:14px;color:#555;line-height:1.6;">
+             You requested a consultation regarding the guide:
+             <strong style="color:#040d2b;">' . esc_html( $d['guide_name'] ) . '</strong>.
+           </p>'
+        : '';
+
+    $content = '
+      <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;
+                 color:#040d2b;line-height:1.25;">
+        Hi ' . esc_html( $d['first_name'] ) . ',
+      </h1>
+      <p style="margin:0 0 16px;font-size:15px;color:#444;line-height:1.7;">
+        Thank you for requesting a consultation with Magellan Solutions.
+        We&rsquo;ve received your request and will be in touch within
+        <strong>1 business day</strong>.
+      </p>
+
+      ' . $guide_line . '
+
+      <hr style="border:none;border-top:1px solid #e8eaef;margin:0 0 24px;">
+
+      <!-- What to expect -->
+      <p style="margin:0 0 14px;font-size:13px;font-weight:700;
+                color:#040d2b;letter-spacing:.04em;text-transform:uppercase;">
+        Your contact details on file
+      </p>
+
+      <table width="100%" cellpadding="0" cellspacing="0" border="0"
+             style="border-collapse:collapse;font-size:14px;margin-bottom:28px;">
+        <tr style="background:#f7f8fc;">
+          <td style="padding:10px 14px;border:1px solid #e8eaef;font-weight:700;
+                     width:110px;color:#040d2b;font-size:13px;">Name</td>
+          <td style="padding:10px 14px;border:1px solid #e8eaef;color:#333;">
+            ' . esc_html( trim( $d['first_name'] . ' ' . $d['last_name'] ) ) . '
+          </td>
+        </tr>
+        <tr style="background:#ffffff;">
+          <td style="padding:10px 14px;border:1px solid #e8eaef;font-weight:700;
+                     color:#040d2b;font-size:13px;">Company</td>
+          <td style="padding:10px 14px;border:1px solid #e8eaef;color:#333;">
+            ' . esc_html( $d['company_name'] ) . '
+          </td>
+        </tr>
+        <tr style="background:#f7f8fc;">
+          <td style="padding:10px 14px;border:1px solid #e8eaef;font-weight:700;
+                     color:#040d2b;font-size:13px;">Phone</td>
+          <td style="padding:10px 14px;border:1px solid #e8eaef;color:#333;">
+            ' . esc_html( $d['phone_number'] ) . '
+          </td>
+        </tr>
+      </table>
+
+      <p style="margin:0;font-size:14px;color:#444;line-height:1.7;">
+        Best regards,<br>
+        <strong style="color:#040d2b;">The Magellan Solutions Team</strong>
+      </p>
+
+      <p style="margin:24px 0 0;font-size:11px;color:#aaa;">
+        This email was sent to ' . esc_html( $d['work_email'] ) . '
       </p>';
 
     return otg_email_wrap( 'Consultation Request', $content );

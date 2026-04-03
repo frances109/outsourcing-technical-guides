@@ -220,6 +220,7 @@ function otg_handle_consultation( WP_REST_Request $request ) {
     }
 
     otg_send_consultation( $data );
+    otg_send_consultation_confirmation( $data );
 
     return new WP_REST_Response( [ 'success' => true, 'message' => 'Consultation request sent.' ], 200 );
 }
@@ -356,4 +357,19 @@ function otg_send_consultation( array $d ) {
         $d['first_name'], $d['last_name'], $d['company_name'] );
 
     wp_mail( $recipients, $subject, otg_email_consultation( $d ), [ 'Content-Type: text/html; charset=UTF-8' ] );
+}
+/* ═══════════════════════════════════════════════════════════════
+   9. CONSULTATION CONFIRMATION EMAIL TO SUBMITTER
+   Fires alongside the admin consultation email so the visitor
+   knows their request was received.
+═══════════════════════════════════════════════════════════════ */
+function otg_send_consultation_confirmation( array $d ) {
+    $subject = 'Your Consultation Request – Magellan Solutions';
+
+    wp_mail(
+        $d['work_email'],
+        $subject,
+        otg_email_consultation_confirmation( $d ),
+        [ 'Content-Type: text/html; charset=UTF-8' ]
+    );
 }
