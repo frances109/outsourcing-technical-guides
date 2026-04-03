@@ -147,6 +147,7 @@
     btn.disabled = on;
     if (label)   label.style.display   = on ? 'none'         : '';
     if (spinner) spinner.style.display = on ? 'inline-block' : 'none';
+    if (label)   label.style.opacity = on ? '0.6' : '1';
   }
 
   function guardAccess() {

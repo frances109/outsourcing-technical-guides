@@ -219,6 +219,15 @@ function otg_handle_consultation( WP_REST_Request $request ) {
         return new WP_REST_Response( [ 'success' => false, 'message' => 'Invalid email address.' ], 400 );
     }
 
+    // Save consultation request to Flamingo (inbound message + address book)
+    $fullname = trim( $data['first_name'] . ' ' . $data['last_name'] );
+    $guide    = ! empty( $data['guide_name'] ) ? ' – ' . $data['guide_name'] : '';
+    otg_save_to_flamingo(
+        $data,
+        "Consultation Request – {$fullname} ({$data['company_name']}){$guide}",
+        'outsourcing-technical-guides'
+    );
+
     otg_send_consultation( $data );
     otg_send_consultation_confirmation( $data );
 
@@ -248,71 +257,78 @@ function otg_verify_recaptcha( string $token ) {
 /* ═══════════════════════════════════════════════════════════════
    5. FLAMINGO — INBOUND MESSAGE + ADDRESS BOOK
 ═══════════════════════════════════════════════════════════════ */
-function otg_store_flamingo( array $d ) {
-    if ( ! class_exists( 'Flamingo_Inbound_Message' ) ) return;
 
-    // ── Inbound Message ───────────────────────────────────────
-    Flamingo_Inbound_Message::add( [
-        'channel'    => 'outsourcing-technical-guides',
-        'subject'    => sprintf(
-            'New Guide Request – %s %s (%s)',
-            $d['first_name'],
-            $d['last_name'],
-            $d['company_name']
-        ),
-        'from'       => sprintf(
-            '%s %s <%s>',
-            $d['first_name'],
-            $d['last_name'],
-            $d['work_email']
-        ),
-        'from_name'  => trim( $d['first_name'] . ' ' . $d['last_name'] ),
-        'from_email' => $d['work_email'],
-        'fields'     => $d,
-        'meta'       => [ 'remote_ip' => sanitize_text_field( $_SERVER['REMOTE_ADDR'] ?? '' ) ],
-        'timestamp'  => time(),
-    ] );
+/**
+ * Save an inbound message + upsert address-book contact.
+ * Shared by both the guide-request and consultation flows.
+ *
+ * Flamingo_Contact API (from source):
+ *   - search_by_email( $email )   → object|null  (queries _email meta directly)
+ *   - add( ['email','name','props','last_contacted'] )  → upserts and saves
+ *   - props[]  stores arbitrary extra fields (company, phone, etc.)
+ *   - NO find_or_create(), NO meta/channels properties
+ */
+function otg_save_to_flamingo( array $d, string $subject, string $channel ): void {
 
-    // ── Address Book ──────────────────────────────────────────
-    if ( ! class_exists( 'Flamingo_Contact' ) ) return;
+    // Normalize values
+    $email    = strtolower( trim( $d['work_email'] ?? '' ) );
+    $fullname = trim( ($d['first_name'] ?? '') . ' ' . ($d['last_name'] ?? '') );
 
-    // 🔍 Try to find existing contact by email
-    $contacts = Flamingo_Contact::find( [
-        's' => $d['work_email']
-    ] );
-
-    $contact = null;
-
-    if ( ! empty( $contacts ) ) {
-        // Use first matched contact
-        $contact = $contacts[0];
-    } else {
-        // Create new contact
-        $contact = new Flamingo_Contact();
+    if ( empty( $email ) ) {
+        return; // Cannot proceed without email
     }
 
-    // ✏️ Set basic info
-    $contact->name  = trim( $d['first_name'] . ' ' . $d['last_name'] );
-    $contact->email = $d['work_email'];
+    // ─────────────────────────────────────────
+    // 1. Save Inbound Message (FIXED - uses Flamingo API)
+    // ─────────────────────────────────────────
+    if ( class_exists( 'Flamingo_Inbound_Message' ) ) {
 
-    // 🧩 Merge meta
-    $existing_meta = (array) ( $contact->meta ?? [] );
-    $contact->meta = array_merge( $existing_meta, [
-        'company' => $d['company_name'],
-        'phone'   => $d['phone_number'],
-    ] );
-
-    // 🏷 Channels (history)
-    $existing_channels = (array) ( $contact->channels ?? [] );
-
-    if ( ! in_array( 'outsourcing-technical-guides', $existing_channels, true ) ) {
-        $existing_channels[] = 'outsourcing-technical-guides';
+        Flamingo_Inbound_Message::add( [
+            'channel'    => $channel,
+            'subject'    => $subject,
+            'from'       => $fullname . ' <' . $email . '>',
+            'from_name'  => $fullname,
+            'from_email' => $email,
+            'fields'     => $d,
+            'meta'       => [
+                'remote_ip' => sanitize_text_field( $_SERVER['REMOTE_ADDR'] ?? '' ),
+                'user_agent'=> sanitize_text_field( $_SERVER['HTTP_USER_AGENT'] ?? '' ),
+            ],
+        ] );
     }
 
-    $contact->channels = $existing_channels;
+    // ─────────────────────────────────────────
+    // 2. Save / Update Address Book
+    // ─────────────────────────────────────────
+    if ( class_exists( 'Flamingo_Contact' ) ) {
 
-    // 💾 Save (insert/update)
-    $contact->save();
+        // Get existing contact (if any)
+        $existing = Flamingo_Contact::search_by_email( $email );
+        $props    = $existing ? (array) $existing->props : [];
+
+        // Preserve old props, update only needed fields
+        $props['company'] = $d['company_name'] ?? ($props['company'] ?? '');
+        $props['phone']   = $d['phone_number'] ?? ($props['phone'] ?? '');
+        $props['channel'] = $channel;
+
+        Flamingo_Contact::add( [
+            'email'          => $email,
+            'name'           => $fullname,
+            'props'          => $props,
+            'last_contacted' => current_time( 'mysql' ),
+            'channel'        => $channel,
+        ] );
+    }
+}
+
+/** Called on guide-request form submit */
+function otg_store_flamingo( array $d ): void {
+    $fullname = trim( $d['first_name'] . ' ' . $d['last_name'] );
+    otg_save_to_flamingo(
+        $d,
+        "New Guide Request – {$fullname} ({$d['company_name']})",
+        'outsourcing-technical-guides'
+    );
 }
 
 /* ═══════════════════════════════════════════════════════════════

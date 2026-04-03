@@ -102,7 +102,7 @@ $contact = isset( $_SESSION['otg_contact'] ) ? $_SESSION['otg_contact'] : [];
                         <div class="mg-card-icon mb-3"><i class="bi bi-gear-wide-connected"></i></div>
                         <h3 class="mg-card-title mb-2">Back-Office &amp; Process Support</h3>
                         <p class="mg-card-desc flex-grow-1 mb-3">Data processing, finance operations &amp; compliance frameworks for growing businesses.</p>
-                        <div style="color: #8b0000; font-weight: 600; margin-bottom: 0.5rem; font-size: .7rem;">Currently Unavailable</div>
+                        <div style="color: #8b0000; font-weight: 600; margin-bottom: 0.5rem; font-size: .7rem; font-style: italic;">Currently Unavailable</div>
                         <a href="<?php echo esc_url( $pdf_base . 'back-office-process-support.pdf' ); ?>"
                             download="Magellan-BackOffice-Guide.pdf"
                             class="mg-dl-btn btn w-100 py-2"
@@ -117,7 +117,7 @@ $contact = isset( $_SESSION['otg_contact'] ) ? $_SESSION['otg_contact'] : [];
                         <div class="mg-card-icon mb-3"><i class="bi bi-shield-check"></i></div>
                         <h3 class="mg-card-title mb-2">Technical Support &amp; Helpdesk</h3>
                         <p class="mg-card-desc flex-grow-1 mb-3">Escalation workflows, certifications &amp; real SLA examples from active engagements.</p>
-                        <div style="color: #8b0000; font-weight: 600; margin-bottom: 0.5rem; font-size: .7rem;">Currently Unavailable</div>
+                        <div style="color: #8b0000; font-weight: 600; margin-bottom: 0.5rem; font-size: .7rem; font-style: italic;">Currently Unavailable</div>
                         <a href="<?php echo esc_url( $pdf_base . 'technical-support-helpdesk.pdf' ); ?>"
                             download="Magellan-Helpdesk-Guide.pdf"
                             class="mg-dl-btn btn w-100 py-2"
@@ -139,13 +139,15 @@ $contact = isset( $_SESSION['otg_contact'] ) ? $_SESSION['otg_contact'] : [];
                     </div>
 
                     <div class="d-flex align-items-center justify-content-start mt-3">              
-                        <a id="mg-consult-btn" class="mg-dl-btn btn py-2" style="width:auto;">
+                        <button id="mg-consult-btn" class="mg-dl-btn btn py-2" type="button">
 
                             <span class="mg-btn-label">Book a Consultation</span>
 
-                            <span class="mg-spinner" style="display:none"></span>
+                            <span class="mg-spinner spinner-border spinner-border-sm ms-2" role="status" style="display:none;">
+                                <span class="visually-hidden">Loading...</span>
+                            </span>
 
-                        </a>
+                        </button>
                     </div>
                     
                 </div>
