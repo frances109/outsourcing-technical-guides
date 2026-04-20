@@ -2,5 +2,6 @@
   "entry_mode": "fullpage",
   "project_type": "dynamic",
   "page_slug": "outsourcing-technical-guides",
-  "redirect_page_slug": "outsourcing-download-guides"
+  "redirect_page_slug": "outsourcing-download-guides",
+  "plugin_prefix": "otg"
 }

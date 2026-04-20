@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
    $content       — the inner HTML unique to each email type
 ───────────────────────────────────────────────────────────── */
 function otg_email_wrap( string $header_label, string $content ): string {
-    $logo_url = OTG_PLUGIN_URL . '../assets/logo-email.png';
+    $logo_url = OTG_PLUGIN_URL . 'assets/logo-email.png';
 
     return '<!DOCTYPE html>
 <html lang="en">
