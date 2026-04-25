@@ -207,3 +207,59 @@
   .mg-dl-inner { padding-left: 1rem; padding-right: 1rem; }
   .mg-dl-heading { font-size: clamp(1.6rem, 6vw, 2.2rem); }
 }
+
+/* ── LAPTOP SCALE DOWN — PAGE 2 ─────────────────────────────── */
+@media (max-width: 1599px) and (max-height: 849px) {
+  .mg-dl-inner {
+    max-width: 640px;
+  }
+
+  .mg-check-ring {
+    width: 62px;
+    height: 62px;
+    font-size: 1.55rem;
+  }
+
+  .mg-tag {
+    font-size: .56rem;
+    padding: 4px 11px;
+  }
+
+  .mg-dl-heading {
+    font-size: clamp(1.75rem, 3.6vw, 2.55rem);
+  }
+
+  .mg-dl-sub {
+    font-size: .8rem;
+    max-width: 440px;
+  }
+
+  .mg-dl-page .mg-guide-card {
+    padding: 1.25rem !important;
+  }
+
+  .mg-dl-page .mg-card-icon {
+    width: 32px;
+    height: 32px;
+    font-size: .9rem;
+  }
+
+  .mg-dl-page .mg-card-title {
+    font-size: .8rem;
+  }
+
+  .mg-dl-page .mg-card-desc {
+    font-size: .66rem;
+  }
+
+  .mg-dl-btn,
+  #mg-consult-btn {
+    font-size: .72rem !important;
+    padding: .45rem .85rem !important;
+  }
+
+  .mg-dl-cta-bar .mg-cta-btn {
+    font-size: .8rem !important;
+    padding: .55rem 1.25rem !important;
+  }
+}
