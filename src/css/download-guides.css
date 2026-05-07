@@ -25,8 +25,9 @@
 }
 
 .mg-dl-inner {
-  max-width: 700px;
-  position: relative; z-index: 2;
+  max-width: 50vw;
+  position: relative; 
+  z-index: 2;
 }
 
 /* ── CONFETTI DOTS ──────────────────────────────────────────── */
@@ -145,7 +146,6 @@
 /* Image 2: Centred panel, max 700px, dark glass with subtle cyan border.
    Three rows: icon + title + subtitle, separated by faint hr lines. */
 .mg-next-panel {
-  max-width: 700px;
   margin-left: auto;
   margin-right: auto;
 }
@@ -210,9 +210,6 @@
 
 /* ── LAPTOP SCALE DOWN — PAGE 2 ─────────────────────────────── */
 @media (max-width: 1599px) and (max-height: 849px) {
-  .mg-dl-inner {
-    max-width: 640px;
-  }
 
   .mg-check-ring {
     width: 62px;

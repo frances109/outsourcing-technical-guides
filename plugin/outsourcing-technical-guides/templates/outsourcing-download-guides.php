@@ -114,11 +114,10 @@ if ( ! $hub_mode ) : ?>
                         <div class="mg-card-icon mb-3"><i class="bi bi-gear-wide-connected"></i></div>
                         <h3 class="mg-card-title mb-2">Back-Office &amp; Process Support</h3>
                         <p class="mg-card-desc flex-grow-1 mb-3">Data processing, finance operations &amp; compliance frameworks for growing businesses.</p>
-                        <div style="color:#8b0000;font-weight:600;margin-bottom:0.5rem;font-size:.7rem;font-style:italic;">Currently Unavailable</div>
+                        <!-- <div style="color:#8b0000;font-weight:600;margin-bottom:0.5rem;font-size:.7rem;font-style:italic;">Currently Unavailable</div> -->
                         <a href="<?php echo esc_url( $pdf_base . 'back-office-process-support.pdf' ); ?>"
                             download="Magellan-BackOffice-Guide.pdf"
                             class="mg-dl-btn btn w-100 py-2"
-                            disabled style="pointer-events:none;opacity:0.6;"
                             data-guide-name="Back-Office &amp; Process Support">
                             <i class="bi bi-file-earmark-pdf"></i> Download PDF
                         </a>

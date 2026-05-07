@@ -5,7 +5,7 @@
  * Description:  Full-page Executive Guides flow with reCAPTCHA v3 and Flamingo.
  *               Works standalone OR as a Magellan Hub project (auto-detected).
  *               Completely overrides the active theme — zero theme CSS interference.
- * Version:      1.1.4
+ * Version:      1.1.5
  * Author:       Magellan Solutions
  * License:      GPL-2.0+
  * Text Domain:  outsourcing-technical-guides
